@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteData, updateData } from '../redux/cartSlice';
+import { useNavigate } from 'react-router-dom';
 
 const CartComponent = () => {
+    const navigate = useNavigate()
     const [cart_data, setCart_Data] = useState([])
     const dispatch = useDispatch()
     let data = useSelector((store)=>store.cartData.value)
@@ -24,6 +26,17 @@ const CartComponent = () => {
 
   function editProductQty(data){
    dispatch(updateData(data))
+  }
+
+  function checkOut(e){
+    e.preventDefault()
+    let id = localStorage.getItem('id')
+    if(id){
+   alert('login')
+    }else{
+        navigate("/login")
+    }
+
   }
 
     return (
@@ -195,7 +208,7 @@ const CartComponent = () => {
                                                         type="button"
                                                         className="btn btn-warning btn-block btn-lg"
                                                     >
-                                                        <div className="d-flex justify-content-between">
+                                                        <div className="d-flex justify-content-between" onClick={checkOut}>
                                                             <span>${price+shippingcharge}</span>
                                                             <span>
                                                                 Checkout{" "}
