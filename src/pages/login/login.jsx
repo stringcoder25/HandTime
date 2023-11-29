@@ -72,7 +72,7 @@ console.log(userData);
             <div className="form-inner">
               <form className="login" onSubmit={formSubmit}>
                 <div className="field">
-                  <input type="tel" placeholder="Email Address" name="mobile" onChange={getInput} required />
+                  <input type="tel" placeholder="Mobile No." name="mobile" onChange={getInput} required />
                 </div>
                 <div className="field">
                   <input type="password" placeholder="Password" onChange={getInput} name="password" required />

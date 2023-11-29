@@ -3,41 +3,93 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteData, updateData } from '../redux/cartSlice';
 import { useNavigate } from 'react-router-dom';
+import  loadScript  from "../payments/script"
+
 
 const CartComponent = () => {
     const navigate = useNavigate()
     const [cart_data, setCart_Data] = useState([])
     const dispatch = useDispatch()
-    let data = useSelector((store)=>store.cartData.value)
+    let data = useSelector((store) => store.cartData.value)
 
-    const price = cart_data?.reduce((total, value) => total + value.price*value.Qty, 0)
-    const shippingcharge = data.length?20:0 
+    const price = cart_data?.reduce((total, value) => total + value.price * value.Qty, 0)
+    const shippingcharge = data.length ? 20 : 0
 
     useEffect(() => {
-        if(data){
+        if (data) {
             setCart_Data(data)
         }
     }, [data])
 
     // item delete in cart
-   function itemDel(id){
-    dispatch(deleteData(id))
-   }
-
-  function editProductQty(data){
-   dispatch(updateData(data))
-  }
-
-  function checkOut(e){
-    e.preventDefault()
-    let id = localStorage.getItem('id')
-    if(id){
-   alert('login')
-    }else{
-        navigate("/login")
+    function itemDel(id) {
+        dispatch(deleteData(id))
     }
 
-  }
+    function editProductQty(data) {
+        dispatch(updateData(data))
+    }
+
+    async function checkOut(e) {
+        e.preventDefault()
+        let id = localStorage.getItem('id')
+        if (id) {
+            const res = await loadScript(
+                "https://checkout.razorpay.com/v1/checkout.js"
+            );
+
+            if (!res) {
+                alert("Razorpay SDK failed to load. Are you online?");
+                return;
+            }
+
+            // const result = await axios.post("");
+
+            // if (!result) {
+            //     alert("Server error. Are you online?");
+            //     return;
+            // }
+
+            const obj = { amount: price, id: 1245882 }
+
+            const options = {
+                key: "rzp_test_r6FiJfddJh76SI", // Enter the Key ID generated from the Dashboard
+                amount: obj.amount.toString(),
+                name: "Soumya Corp.",
+                description: "Test Transaction",
+                order_id: obj.id,
+                handler: async function (response) {
+                    const data = {
+                        orderCreationId: obj.id,
+                        razorpayPaymentId: response.razorpay_payment_id,
+                        razorpayOrderId: response.razorpay_order_id,
+                        razorpaySignature: response.razorpay_signature,
+                    };
+
+                    console.log(data);
+                },
+                prefill: {
+                    name: "Soumya Dey",
+                    email: "SoumyaDey@example.com",
+                    contact: "9999999999",
+                },
+                notes: {
+                    address: "Soumya Dey Corporate Office",
+                },
+                theme: {
+                    color: "#61dafb",
+                },
+            };
+
+            const paymentObject = new window.Razorpay(options);
+            paymentObject.open();
+
+
+        } else {
+            navigate("/login")
+        }
+
+    }
 
     return (
         <>
@@ -89,14 +141,14 @@ const CartComponent = () => {
                                                         </div>
                                                         <div className="d-flex flex-row align-items-center">
                                                             <div style={{ width: 100 }} className='d-flex ms-5'>
-                                                                <button className='btn btn-info ms-2' disabled={item?.Qty<=1?true:false} onClick={()=>{editProductQty({id:item.id,type:"decrement"})}}>-</button>
+                                                                <button className='btn btn-info ms-2' disabled={item?.Qty <= 1 ? true : false} onClick={() => { editProductQty({ id: item.id, type: "decrement" }) }}>-</button>
                                                                 <h5 className="fw-normal mb-0">{item.Qty}</h5>
-                                                                <button className='btn btn-info me-2' onClick={()=>{editProductQty({id:item.id,type:"increment"})}}>+</button>
+                                                                <button className='btn btn-info me-2' onClick={() => { editProductQty({ id: item.id, type: "increment" }) }}>+</button>
                                                             </div>
                                                             <div style={{ width: 80 }}>
-                                                                <h5 className="mb-0">${item?.price*item?.Qty}</h5>
+                                                                <h5 className="mb-0">${item?.price * item?.Qty}</h5>
                                                             </div>
-                                                            <div style={{ color: "#cecece",cursor:"pointer" }} onClick={()=>{itemDel(item?.id)}}>
+                                                            <div style={{ color: "#cecece", cursor: "pointer" }} onClick={() => { itemDel(item?.id) }}>
                                                                 <i className="fa fa-trash" />
                                                             </div>
                                                         </div>
@@ -202,14 +254,14 @@ const CartComponent = () => {
                                                     </div>
                                                     <div className="d-flex justify-content-between mb-4">
                                                         <p className="mb-2">Total(Incl. taxes)</p>
-                                                        <p className="mb-2">${price+shippingcharge}</p>
+                                                        <p className="mb-2">${price + shippingcharge}</p>
                                                     </div>
                                                     <button
                                                         type="button"
                                                         className="btn btn-warning btn-block btn-lg"
                                                     >
                                                         <div className="d-flex justify-content-between" onClick={checkOut}>
-                                                            <span>${price+shippingcharge}</span>
+                                                            <span>${price + shippingcharge}</span>
                                                             <span>
                                                                 Checkout{" "}
                                                                 <i className="fa fa-long-arrow-right ms-2" />

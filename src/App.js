@@ -8,6 +8,7 @@ import Main from './pages/main';
 import './App.css';
 import CartComponent from './components/cartComponent';
 import Signup from './pages/login/signup';
+import Profile from './pages/login/profile';
 
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
         <Route path='/service' element={<ServiceSeaction />} />
         <Route path='/product' element={<Product />} />
         <Route path='/cart' element={<CartComponent />} />
+        <Route path='/profile' element={<Profile />} />
       </Routes>
       {/* <Footer/> */}
     </>
